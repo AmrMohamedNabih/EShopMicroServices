@@ -1,26 +1,32 @@
-﻿
+﻿namespace Catalog.API.Products.CreateProduct;
 
-namespace Catalog.API.Products.CreateProduct
+public record CreateProductCommand(string Name, List<string> Category, string Description, string ImageFile, decimal Price)
+    : ICommand<CreateProductResult>;
+public record CreateProductResult(Guid Id);
+
+internal class CreateProductCommandHandler(IDocumentSession session)
+    : ICommandHandler<CreateProductCommand, CreateProductResult>
 {
-    public record CreateProductCommend(string Name ,List<string> Categoury , string Description , string ImageFile , decimal Price ) : ICommend<CreateProductResult>;
-    public record CreateProductResult(Guid Id);
-    internal class CreateProductCommendHandler(IDocumentSession session) : ICommendHandler<CreateProductCommend, CreateProductResult>
+    public async Task<CreateProductResult> Handle(CreateProductCommand command, CancellationToken cancellationToken)
     {
-        public async Task<CreateProductResult> Handle(CreateProductCommend request, CancellationToken cancellationToken)
+        //create Product entity from command object
+        //save to database
+        //return CreateProductResult result
+
+        var product = new Product
         {
-            var product = new Product
-            {
-                Name = request.Name,
-                Category = request.Categoury,
-                Description = request.Description,
-                ImageFile = request.ImageFile,
-                Price = request.Price,
+            Name = command.Name,
+            Category = command.Category,
+            Description = command.Description,
+            ImageFile = command.ImageFile,
+            Price = command.Price
+        };
+        
+        //save to database
+        session.Store(product);
+        await session.SaveChangesAsync(cancellationToken);
 
-            };
-            session.Store(product);
-            await session.SaveChangesAsync(cancellationToken);
-
-            return new CreateProductResult(product.Id);
-        }
+        //return result
+        return new CreateProductResult(product.Id);
     }
 }
